@@ -3,7 +3,7 @@
 """
 import socket
 import threading
-import time
+from datetime import datetime
 import game
 
 SERVER_MESSAGE_PREFIX = 'System'
@@ -56,11 +56,7 @@ def send_message(user_id, message_text, prefix=SERVER_MESSAGE_PREFIX, to_self=0)
 
 
 def log(*log_line):
-    now = time.time()
-    milliseconds = '%03d' % int((now - int(now)) * 1000)
-    current_time = time.strftime("%Y/%m/%d %H:%M:%S.") + milliseconds
-    text = "".join(log_line)
-    print(current_time, "-", text)
+    print(datetime.now().isoformat(sep=' ', timespec='milliseconds'), "-", ' '.join(log_line))
 
 
 def start():
@@ -70,7 +66,7 @@ def start():
         conn, addr = server.accept()
         user_name = conn.recv(1024).decode()
         user_id = add_client_info(conn, user_name)
-        log("[USER_CONNECTION] new user has been connected. user_id: ", str(user_id), ", user_name:", user_name)
+        log(f"[USER_CONNECTION] new user has been connected. user_id: {user_id}, user_name: {user_name}")
         thread = threading.Thread(target=handle_client, args=(conn, user_name, user_id))
         thread.start()
 
@@ -99,7 +95,7 @@ def handle_client(conn, user_name, user_id):
             elif new_message == END_CHAT_CMD:
                 send_message(user_id, f"{user_name} has left the chat")
                 send_message(user_id, 'You leave the chat', to_self=1)
-                log("[USER_END_CHAT] user: ", user_name)
+                log(f"[USER_END_CHAT] user: {user_name}")
                 clients.pop(user_id)
                 chat_participants.pop(user_id)
                 conn.close
@@ -122,17 +118,16 @@ def handle_client(conn, user_name, user_id):
                 send_message(user_id, list, to_self=1)
 
             elif new_message == SHOW_TIME:
-                now="Current time "+time.strftime("%Y/%m/%d %H:%M:%S")
-                send_message(user_id, now, to_self=1)
+                send_message(user_id, "Current time "+datetime.now().isoformat(sep=' ', timespec='seconds'), to_self=1)
 
             else:
                 send_message(user_id, f'Invalid command. Type "{HELP}" to see chat commands.', to_self=1)
 
-            log("[COMMAND_MESSAGE] user: ", user_name, ", command_text: ", new_message)
+            log(f"[COMMAND_MESSAGE] user: {user_name}, command_text: {new_message}")
 
         else:
-            log("[NEW_MESSAGE] user: ", user_name, ", message_text: ", new_message)
             send_message(user_id, new_message, user_name)
+            log(f"[NEW_MESSAGE] user: {user_name} message_text: {new_message}")
 
 
 start()
