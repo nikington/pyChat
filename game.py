@@ -1,7 +1,6 @@
 import random
 import socket
 
-
 def rock_paper_scissors(client: socket):
     variants = {1: 'rock', 2: 'paper', 3: 'scissors'}
     initial_msg = '1 - rock\n2 - paper\n3 - scissors\nType you option 1, 2 or 3:'
