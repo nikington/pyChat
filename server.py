@@ -4,7 +4,7 @@
 import socket
 import threading
 import time
-import game
+from game import rock_paper_scissors
 
 SERVER_MESSAGE_PREFIX = 'System'
 
@@ -82,7 +82,7 @@ def handle_client(conn, user_name, user_id):
     send_message(user_id, message, to_self=1)
 
     #
-    # Add verification of existent users in the chat
+    # TBD: Add verification of existent users in the chat
     #
 
     message = user_name + ' has joined to the chat'
@@ -108,7 +108,7 @@ def handle_client(conn, user_name, user_id):
             elif new_message == GAME_CMD:
                 log(f"[GAME_START] user {user_name} started RPS")
                 send_message(user_id, 'Rock Paper Scissors game has been started', to_self=1)
-                game.rock_paper_scissors(conn)
+                rock_paper_scissors(conn)
                 send_message(user_id, 'Now you can continue chat', to_self=1)
                 log(f'[GAME_END] user {user_name} ended RPS')
 
