@@ -113,12 +113,14 @@ def handle_client(conn, user_name, user_id):
                 log(f'[GAME_END] user {user_name} ended RPS')
 
             elif new_message == PARTICIPANT_COUNT:
-                send_message(user_id, len(chat_participants), to_self=1)
+                send_message(user_id, "Number of Participants - "+str(len(chat_participants)), to_self=1)
 
             elif new_message == PARTICIPANTS:
+                list='\nChat participants: \n'
                 for id, user in chat_participants.items():
-                    send_message(user_id, user, to_self=1)
-                    
+                    list+=user+'\n'
+                send_message(user_id, list, to_self=1)
+
             elif new_message == SHOW_TIME:
                 now="Current time "+time.strftime("%Y/%m/%d %H:%M:%S")
                 send_message(user_id, now, to_self=1)
