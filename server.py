@@ -117,7 +117,8 @@ def handle_client(conn, user_name, user_id):
             elif new_message == PARTICIPANTS:
                 pass
             elif new_message == SHOW_TIME:
-                pass
+                now="Current time "+time.strftime("%Y/%m/%d %H:%M:%S")
+                send_message(user_id, now, to_self=1)
 
             else:
                 send_message(user_id, f'Invalid command. Type "{HELP}" to see chat commands.', to_self=1)
