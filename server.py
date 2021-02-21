@@ -61,7 +61,7 @@ def log(*log_line):
 
 def start():
     log("[START] server has been started")
-    while 1:
+    while True:
         server.listen()
         conn, addr = server.accept()
         user_name = conn.recv(1024).decode()
@@ -85,7 +85,7 @@ def handle_client(conn, user_name, user_id):
     send_message(user_id, message)
     log(f"[CHAT_JOIN] user {user_name} joins to the chat")
     chat_participants[user_id] = user_name
-    while 1:
+    while True:
         new_message = conn.recv(1024).decode()
         if new_message.startswith('##'):
 
@@ -109,7 +109,7 @@ def handle_client(conn, user_name, user_id):
                 log(f'[GAME_END] user {user_name} ended RPS')
 
             elif new_message == PARTICIPANT_COUNT:
-                send_message(user_id, "Number of Participants - "+str(len(chat_participants)), to_self=1)
+                send_message(user_id, f"Number of Participants - {len(chat_participants)}", to_self=1)
 
             elif new_message == PARTICIPANTS:
                 list='\nChat participants: \n'
