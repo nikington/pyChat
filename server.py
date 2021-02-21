@@ -32,6 +32,7 @@ server.bind((HOST, PORT))
 
 clients = []
 
+
 def send_message(user_id, message_text, prefix=SERVER_MESSAGE_PREFIX, to_self=0):
     message = prefix + ': ' + message_text
     message = message.encode()
@@ -44,8 +45,10 @@ def send_message(user_id, message_text, prefix=SERVER_MESSAGE_PREFIX, to_self=0)
                 recipient = clients[client_id]['connection']
                 recipient.send(message)
 
+
 def log(*log_line):
     print(datetime.now().isoformat(sep=' ', timespec='milliseconds'), "-", ' '.join(log_line))
+
 
 def start():
     log("[START] server has been started")
@@ -54,17 +57,19 @@ def start():
         conn, addr = server.accept()        
         thread = threading.Thread(target=handle_client, args=(conn,))
         thread.start()
-        
+
+
 def check_user_name(conn):
-    exist=True
+    exist = True
     while exist:
         user_name = conn.recv(128).decode()
-        exist=False
+        exist = False
         for client in clients:
-            if user_name==client['name']:
-                exist=True
+            if user_name == client['name']:
+                exist = True
                 conn.send("System: The user with this name already exist".encode())
     return user_name
+
 
 def user_initial_steps(id):
     user_name=clients[id]['name']
@@ -75,6 +80,7 @@ def user_initial_steps(id):
     send_message(id, message, to_self=1)
     send_message(id, user_name + ' has joined to the chat')
     log(f"[CHAT_JOIN] user {user_name} joins to the chat")
+
 
 def handle_client(conn):    
     user_name=check_user_name(conn)
@@ -124,5 +130,6 @@ def handle_client(conn):
         else:
             send_message(user_id, new_message, user_name)
             log(f"[NEW_MESSAGE] user: {user_name} message_text: {new_message}")
+
 
 start()
