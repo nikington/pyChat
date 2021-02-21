@@ -30,17 +30,7 @@ PORT = 55500
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 
-clients = {}
-client_id = 0
-chat_participants = {}
-
-
-def add_client_info(client_connection, nick_name):
-    global client_id
-    client_id += 1
-    clients[client_id] = {'connection': client_connection, 'name': nick_name}
-    return client_id
-
+clients = []
 
 def send_message(user_id, message_text, prefix=SERVER_MESSAGE_PREFIX, to_self=0):
     message = prefix + ': ' + message_text
@@ -49,42 +39,49 @@ def send_message(user_id, message_text, prefix=SERVER_MESSAGE_PREFIX, to_self=0)
         recipient = clients[user_id]['connection']
         recipient.send(message)
     else:
-        for client in clients:
-            if client != user_id:
-                recipient = clients[client]['connection']
+        for client_id in range(len(clients)):
+            if client_id != user_id:
+                recipient = clients[client_id]['connection']
                 recipient.send(message)
-
 
 def log(*log_line):
     print(datetime.now().isoformat(sep=' ', timespec='milliseconds'), "-", ' '.join(log_line))
-
 
 def start():
     log("[START] server has been started")
     while True:
         server.listen()
-        conn, addr = server.accept()
-        user_name = conn.recv(1024).decode()
-        user_id = add_client_info(conn, user_name)
-        log(f"[USER_CONNECTION] new user has been connected. user_id: {user_id}, user_name: {user_name}")
-        thread = threading.Thread(target=handle_client, args=(conn, user_name, user_id))
+        conn, addr = server.accept()        
+        thread = threading.Thread(target=handle_client, args=(conn,))
         thread.start()
+        
+def check_user_name(conn):
+    exist=True
+    while exist:
+        user_name = conn.recv(128).decode()
+        exist=False
+        for client in clients:
+            if user_name==client['name']:
+                exist=True
+                conn.send("System: The user with this name already exist".encode())
+    return user_name
 
-
-def handle_client(conn, user_name, user_id):
-    send_message(user_id, f"Greetings, {user_name}!", to_self=1)
+def user_initial_steps(id):
+    user_name=clients[id]['name']
+    log(f"[USER_CONNECTION] new user has been connected. user_id: {id}, user_name: {user_name}")
+    send_message(id, f"Greetings, {user_name}!", to_self=1)
     message = "You are connected to the chat. Now you can send messages." \
               f'\nType "{HELP}" to see chat commands.'
-    send_message(user_id, message, to_self=1)
-
-    #
-    # TBD: Add verification of existent users in the chat
-    #
-
-    message = user_name + ' has joined to the chat'
-    send_message(user_id, message)
+    send_message(id, message, to_self=1)
+    send_message(id, user_name + ' has joined to the chat')
     log(f"[CHAT_JOIN] user {user_name} joins to the chat")
-    chat_participants[user_id] = user_name
+
+def handle_client(conn):    
+    user_name=check_user_name(conn)
+    clients.append({'connection': conn, 'name': user_name})
+    user_id=len(clients)-1
+    user_initial_steps(user_id)
+
     while True:
         new_message = conn.recv(1024).decode()
         if new_message.startswith('##'):
@@ -97,8 +94,7 @@ def handle_client(conn, user_name, user_id):
                 send_message(user_id, 'You leave the chat', to_self=1)
                 log(f"[USER_END_CHAT] user: {user_name}")
                 clients.pop(user_id)
-                chat_participants.pop(user_id)
-                conn.close
+                conn.close()
                 break
 
             elif new_message == GAME_CMD:
@@ -109,13 +105,13 @@ def handle_client(conn, user_name, user_id):
                 log(f'[GAME_END] user {user_name} ended RPS')
 
             elif new_message == PARTICIPANT_COUNT:
-                send_message(user_id, f"Number of Participants - {len(chat_participants)}", to_self=1)
+                send_message(user_id, f"Number of Participants - {len(clients)}", to_self=1)
 
             elif new_message == PARTICIPANTS:
-                list='\nChat participants: \n'
-                for id, user in chat_participants.items():
-                    list+=user+'\n'
-                send_message(user_id, list, to_self=1)
+                users_list='\nChat participants: \n'
+                for client in clients:
+                    users_list+=client['name']+'\n'
+                send_message(user_id, users_list, to_self=1)
 
             elif new_message == SHOW_TIME:
                 send_message(user_id, "Current time "+datetime.now().isoformat(sep=' ', timespec='seconds'), to_self=1)
@@ -128,6 +124,5 @@ def handle_client(conn, user_name, user_id):
         else:
             send_message(user_id, new_message, user_name)
             log(f"[NEW_MESSAGE] user: {user_name} message_text: {new_message}")
-
 
 start()
