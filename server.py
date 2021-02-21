@@ -55,8 +55,16 @@ def start():
         thread = threading.Thread(target=handle_client, args=(conn,))
         thread.start()
 
-def handle_client(conn):
-    user_name = conn.recv(128).decode()
+def handle_client(conn):    
+    exist=True
+    while exist:
+        user_name = conn.recv(128).decode()
+        exist=False
+        for client in clients:
+            if user_name==client['name']:
+                exist=True
+                conn.send("System: The user with this name already exist".encode())
+
     clients.append({'connection': conn, 'name': user_name})
     user_id=len(clients)-1
     log(f"[USER_CONNECTION] new user has been connected. user_id: {user_id}, user_name: {user_name}")
@@ -67,6 +75,7 @@ def handle_client(conn):
     message = user_name + ' has joined to the chat'
     send_message(user_id, message)
     log(f"[CHAT_JOIN] user {user_name} joins to the chat")
+
     while True:
         new_message = conn.recv(1024).decode()
         if new_message.startswith('##'):

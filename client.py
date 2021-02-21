@@ -7,8 +7,17 @@ PORT = 55500
 
 s = socket.socket()
 s.connect((HOST,PORT))
-print("Client app is started.\nPlease enter your nickname:")
-
+print("Client app is started.")
+user_exist=True
+while user_exist:
+    print("Please enter your nickname:")
+    new_message_text = input(str())
+    s.send(new_message_text.encode())
+    user_exist=False
+    incoming_message = s.recv(1024).decode()
+    print(incoming_message)
+    if incoming_message=="System: The user with this name already exist":
+        user_exist=True
 
 def close_chat(client):
     client.close()
