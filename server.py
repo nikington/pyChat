@@ -54,8 +54,8 @@ def start():
         conn, addr = server.accept()        
         thread = threading.Thread(target=handle_client, args=(conn,))
         thread.start()
-
-def handle_client(conn):    
+        
+def check_user_name(conn):
     exist=True
     while exist:
         user_name = conn.recv(128).decode()
@@ -64,17 +64,23 @@ def handle_client(conn):
             if user_name==client['name']:
                 exist=True
                 conn.send("System: The user with this name already exist".encode())
+    return user_name
 
-    clients.append({'connection': conn, 'name': user_name})
-    user_id=len(clients)-1
-    log(f"[USER_CONNECTION] new user has been connected. user_id: {user_id}, user_name: {user_name}")
-    send_message(user_id, f"Greetings, {user_name}!", to_self=1)
+def user_initial_steps(id):
+    user_name=clients[id]['name']
+    log(f"[USER_CONNECTION] new user has been connected. user_id: {id}, user_name: {user_name}")
+    send_message(id, f"Greetings, {user_name}!", to_self=1)
     message = "You are connected to the chat. Now you can send messages." \
               f'\nType "{HELP}" to see chat commands.'
-    send_message(user_id, message, to_self=1)
-    message = user_name + ' has joined to the chat'
-    send_message(user_id, message)
+    send_message(id, message, to_self=1)
+    send_message(id, user_name + ' has joined to the chat')
     log(f"[CHAT_JOIN] user {user_name} joins to the chat")
+
+def handle_client(conn):    
+    user_name=check_user_name(conn)
+    clients.append({'connection': conn, 'name': user_name})
+    user_id=len(clients)-1
+    user_initial_steps(user_id)
 
     while True:
         new_message = conn.recv(1024).decode()
