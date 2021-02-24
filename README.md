@@ -1,9 +1,13 @@
-pyChat
-Requements:
-    Python 3.6+
-    OS:Windows 10
-
+<h1 align="center">
+  pyChat. Small console chat for fun and skill training, written on python 3
+</h1>
+<h2>Requements:</h2>
+<ol>
+<li>Python 3.6+</li>
+<li>OS:Windows 10</li>
+<ol>
 How to start work:
+    
     1) Start server:
         1.1) Copy files server.py and game.py to you folder on you PC/server
         1.2) Start server with command in terminal

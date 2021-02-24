@@ -25,7 +25,7 @@ def send_message():
 
 
 s = socket.socket()
-s.connect((HOST,PORT))
+s.connect(HOST, PORT)
 print("Client app is started.")
 user_exist = True
 while user_exist:
@@ -36,7 +36,7 @@ while user_exist:
     incoming_message = s.recv(1024).decode()
     print(incoming_message)
     if incoming_message == "System: The user with this name already exist":
-        user_exist=True
+        user_exist = True
 thread = threading.Thread(target=get_message, args=())
 thread.start()
 thread = threading.Thread(target=send_message, args=())

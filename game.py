@@ -1,6 +1,7 @@
 import random
 import socket
 
+
 def rock_paper_scissors(client: socket):
     variants = {1: 'rock', 2: 'paper', 3: 'scissors'}
     initial_msg = '1 - rock\n2 - paper\n3 - scissors\nType you option 1, 2 or 3:'
@@ -35,4 +36,3 @@ def rock_paper_scissors(client: socket):
         message2 = "\nLet's try again.\nType you option 1, 2, 3. Type 'END' to end the game"
         response = message1 + '\n' + game_result + '\n' + message2
         client.send(response.encode())
-
