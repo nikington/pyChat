@@ -1,8 +1,18 @@
 import socket
 import threading
+import signal
+import sys
+
+
 
 HOST = socket.gethostname()
 PORT = 55500
+END_CHAT_CMD = '##stop'
+connection = 1
+
+
+def signal_handler(signal, frame):
+  sys.exit(0)
 
 
 def close_chat(client):
@@ -11,21 +21,26 @@ def close_chat(client):
 
 
 def get_message():
-    connection = 1
+    global connection
     while connection:
         incoming_message = s.recv(1024).decode()
+        if incoming_message == '':
+            connection = 0
         print(incoming_message)
 
 
 def send_message():
-    connection = 1
+    global connection
     while connection:
         new_message_text = input(str())
+        if new_message_text == END_CHAT_CMD:
+            connection = 0
         s.send(new_message_text.encode())
 
 
+signal.signal(signal.SIGINT, signal_handler)
 s = socket.socket()
-s.connect(HOST, PORT)
+s.connect((HOST, PORT))
 print("Client app is started.")
 user_exist = True
 while user_exist:
@@ -41,3 +56,4 @@ thread = threading.Thread(target=get_message, args=())
 thread.start()
 thread = threading.Thread(target=send_message, args=())
 thread.start()
+
