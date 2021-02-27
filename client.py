@@ -1,9 +1,9 @@
 import socket
 import threading
-import signal
+
 import sys
-
-
+import os
+import signal
 
 HOST = socket.gethostname()
 PORT = 55500
@@ -38,9 +38,28 @@ def send_message():
         s.send(new_message_text.encode())
 
 
-signal.signal(signal.SIGINT, signal_handler)
-s = socket.socket()
-s.connect((HOST, PORT))
+os.system('cls' if os.name == 'nt' else 'clear')
+try:
+    HOST = sys.argv[1]
+    PORT = int(sys.argv[2])
+except:
+    print("Server parametrs were not provided. Default accepted.")
+
+tc = True
+while tc:
+    tc = False
+    try:
+        signal.signal(signal.SIGINT, signal_handler)
+        s = socket.socket()
+        s.connect((HOST, PORT))
+    except TimeoutError:
+        print(f"Server {HOST} on {PORT} is not available.")
+        tc = True
+        print("Enter Host (IP):")
+        HOST = str(input())
+        print("Enter port number")
+        PORT = int(input())
+
 print("Client app is started.")
 user_exist = True
 while user_exist:
@@ -52,6 +71,7 @@ while user_exist:
     print(incoming_message)
     if incoming_message == "System: The user with this name already exist":
         user_exist = True
+os.system('cls' if os.name == 'nt' else 'clear')
 thread = threading.Thread(target=get_message, args=())
 thread.start()
 thread = threading.Thread(target=send_message, args=())
