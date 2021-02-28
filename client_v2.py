@@ -18,17 +18,14 @@ class SendMessage(threading.Thread):
         self.shutdown_flag = threading.Event()
    
     def run(self):
-        print('[INFO] ready to send messages')
-
         while not self.shutdown_flag.is_set():
             try:
                 new_message_text = input(str())
+                self.client_socket.send(new_message_text.encode())
 
                 if new_message_text == END_CHAT_CMD:
                     self.shutdown_flag.set()
-                    
-                self.client_socket.send(new_message_text.encode())
-            
+
             # Handle exception when server was shut down
             except ConnectionResetError:
                 self.shutdown_flag.set()
@@ -49,8 +46,6 @@ class ReceiveMessage(threading.Thread):
         self.shutdown_flag = threading.Event()
 
     def run(self):
-        print('[INFO] ready to receive messages')
-
         while not self.shutdown_flag.is_set():
             try:
                 incoming_message = self.client_socket.recv(1024).decode()
@@ -108,24 +103,22 @@ def main():
 
         # Keep the main thread running, otherwise signals are ignored.
         while t1.is_alive() and t2.is_alive():
-            time.sleep(0.5)
+            time.sleep(0.5)          
 
-        # in case thread is still running because of input
+        # in case thread is still running because of running input
         if t1.is_alive():
             print('Press Enter to finish the program')
-
+           
     except ServiceExit:
-        pass
-        
-    # Terminate the running threads.
-    # Set the shutdown flag on each thread to trigger a clean shutdown of each thread.
-    t1.shutdown_flag.set()
-    t2.shutdown_flag.set()
+        # Terminate the running threads.
+        # Set the shutdown flag on each thread to trigger a clean shutdown of each thread.
+        t1.shutdown_flag.set()
+        t2.shutdown_flag.set()
+
     # Wait for the threads to close...
     t1.join()
     t2.join()
-        
-    s.close()        
+
     print('[EXIT] Closing main program')
 
 
