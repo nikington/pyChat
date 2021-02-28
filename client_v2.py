@@ -84,16 +84,17 @@ def main():
     print("[INFO] client app is started.")
 
     # Check user name for duplicates on the server
-    user_exist = True
-    while user_exist:
+    while True:
         print("Please enter your nickname:")
         new_message_text = input(str())
+        if new_message_text == '':
+            print("Nick name can not be empty")
+            continue
         s.send(new_message_text.encode())
-        user_exist = False
         incoming_message = s.recv(1024).decode()
         print(incoming_message)
-        if incoming_message == "System: The user with this name already exist":
-            user_exist = True
+        if incoming_message != "System: The user with this name already exist":
+            break
             
     try:
         t1 = SendMessage(s)
