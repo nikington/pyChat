@@ -104,7 +104,7 @@ def handle_client(conn):
                     elif new_message == END_CHAT_CMD:
                         send_message(user_id, 'You leave the chat', to_self=1)
                         send_message(user_id, f"{user_name} left the chat")
-                        log(f"[USER_END_CHAT] user: {user_name}. Active users: {len(clients)}")
+                        log(f"[USER_END_CHAT] user: {user_name}.")
                         break
 
                     elif new_message == GAME_CMD:
@@ -140,6 +140,7 @@ def handle_client(conn):
             log(f"[CLIENT_DISCONNECT] {user_name} has been disconnected. Active users: {len(clients)}")
         finally:
             clients.pop(user_id)
+            log(f"Active users: {len(clients)}")
     finally:
         conn.close()
         

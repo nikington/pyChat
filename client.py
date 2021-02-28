@@ -12,7 +12,8 @@ connection = 1
 
 
 def signal_handler(signal, frame):
-  sys.exit(0)
+    print('You pressed Ctrl+C!')
+    sys.exit(0)
 
 
 def close_chat(client):
@@ -39,6 +40,7 @@ def send_message():
 
 
 signal.signal(signal.SIGINT, signal_handler)
+
 s = socket.socket()
 s.connect((HOST, PORT))
 print("Client app is started.")
@@ -56,4 +58,5 @@ thread = threading.Thread(target=get_message, args=())
 thread.start()
 thread = threading.Thread(target=send_message, args=())
 thread.start()
+
 
