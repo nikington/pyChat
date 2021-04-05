@@ -143,7 +143,6 @@ def handle_client(conn):
             log(f"Active users: {len(clients)}")
     finally:
         conn.close()
-        
 
 
 start()

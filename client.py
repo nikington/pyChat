@@ -4,7 +4,6 @@ import signal
 import sys
 
 
-
 HOST = socket.gethostname()
 PORT = 55500
 END_CHAT_CMD = '##stop'
@@ -58,5 +57,3 @@ thread = threading.Thread(target=get_message, args=())
 thread.start()
 thread = threading.Thread(target=send_message, args=())
 thread.start()
-
-

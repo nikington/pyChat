@@ -2,9 +2,9 @@ import threading
 import socket
 import signal
 import time
+import os
+import sys
 
-
-PORT = 55500
 END_CHAT_CMD = '##stop'
 
 
@@ -16,7 +16,7 @@ class SendMessage(threading.Thread):
         # The shutdown_flag is a threading.Event object that
         # indicates whether the thread should be terminated.
         self.shutdown_flag = threading.Event()
-   
+
     def run(self):
         while not self.shutdown_flag.is_set():
             try:
@@ -59,8 +59,8 @@ class ReceiveMessage(threading.Thread):
                 print('[INFO] connection was terminated')
 
         print('[INFO] stop receiving messages')
-        
-        
+
+
 class ServiceExit(Exception):
     """
     Custom exception which is used to trigger the clean exit
@@ -75,12 +75,32 @@ def service_shutdown(sig, frame):
 
 
 def main():
-    # Register the signal handlers
-    signal.signal(signal.SIGINT, service_shutdown)
+    HOST = socket.gethostname()
+    PORT = 55500
+    # check comand line for argumrnts
+    os.system('cls' if os.name == 'nt' else 'clear')
+    try:
+        HOST = sys.argv[1]
+        PORT = int(sys.argv[2])
+    except:
+        print("Server parametrs were not provided. Default accepted.")
+    # try to raise coonection to server
+    tc = True
+    while tc:
+        tc = False
+        try:
+            # Register the signal handlers
+            signal.signal(signal.SIGINT, service_shutdown)
+            s = socket.socket()
+            s.connect((HOST, PORT))
+        except TimeoutError:
+            print(f"Server {HOST} on {PORT} is not available.")
+            tc = True
+            print("Enter Host (IP):")
+            HOST = str(input())
+            print("Enter port number")
+            PORT = int(input())
 
-    host = socket.gethostname()
-    s = socket.socket()
-    s.connect((host, PORT))
     print("[INFO] client app is started.")
 
     # Check user name for duplicates on the server
@@ -95,7 +115,7 @@ def main():
         print(incoming_message)
         if incoming_message != "System: The user with this name already exist":
             break
-            
+
     try:
         t1 = SendMessage(s)
         t2 = ReceiveMessage(s)
@@ -104,12 +124,12 @@ def main():
 
         # Keep the main thread running, otherwise signals are ignored.
         while t1.is_alive() and t2.is_alive():
-            time.sleep(0.5)          
+            time.sleep(0.5)
 
         # in case thread is still running because of running input
         if t1.is_alive():
             print('Press Enter to finish the program')
-           
+
     except ServiceExit:
         # Terminate the running threads.
         # Set the shutdown flag on each thread to trigger a clean shutdown of each thread.
